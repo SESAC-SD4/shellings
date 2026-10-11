@@ -37,6 +37,12 @@ func TestRegistry(t *testing.T) {
 	}
 }
 
+func TestRegistryHasFifteen(t *testing.T) {
+	if n := len(All()); n != 15 {
+		t.Fatalf("문제는 15개여야 합니다(지금 %d)", n)
+	}
+}
+
 func TestEverySetupFailsBeforeSolving(t *testing.T) {
 	for _, ex := range All() {
 		dir := prepare(t, ex)
