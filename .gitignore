@@ -1,3 +1,9 @@
 shellings-darwin-arm64
 shellings-darwin-amd64
 .DS_Store
+
+# 강사용 설계·계획 문서 (저장소에 올리지 않음)
+BRIEF.md
+RESEARCH.md
+docs/
+.superpowers/
