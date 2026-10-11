@@ -48,6 +48,18 @@ func TestNextHintCapsAndResets(t *testing.T) {
 	}
 }
 
+func TestUnpass(t *testing.T) {
+	p := &Progress{Passed: []int{1, 2, 3}}
+	p.Unpass(2)
+	if p.IsPassed(2) || !p.IsPassed(1) || !p.IsPassed(3) {
+		t.Fatalf("2번만 통과 기록에서 빠져야 합니다: %v", p.Passed)
+	}
+	p.Unpass(9)
+	if len(p.Passed) != 2 {
+		t.Fatal("없는 번호를 빼도 다른 기록은 그대로여야 합니다")
+	}
+}
+
 func TestLoadBrokenFile(t *testing.T) {
 	home := t.TempDir()
 	t.Setenv("HOME", home)

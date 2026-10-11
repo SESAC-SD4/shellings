@@ -48,6 +48,16 @@ func (p *Progress) MarkPassed(id int) {
 	}
 }
 
+func (p *Progress) Unpass(id int) {
+	kept := p.Passed[:0]
+	for _, v := range p.Passed {
+		if v != id {
+			kept = append(kept, v)
+		}
+	}
+	p.Passed = kept
+}
+
 func (p *Progress) IsPassed(id int) bool {
 	for _, v := range p.Passed {
 		if v == id {

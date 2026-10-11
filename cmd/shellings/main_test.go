@@ -123,6 +123,19 @@ func TestReset(t *testing.T) {
 	}
 }
 
+func TestResetClearsPass(t *testing.T) {
+	setHome(t)
+	call(t, "", "start", "1")
+	if err := os.Mkdir(filepath.Join(workspace.Dir("01-make-til"), "TIL"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	call(t, "", "check")
+	call(t, "", "reset")
+	if p, _ := progress.Load(); p.IsPassed(1) {
+		t.Fatal("reset하면 통과 기록도 지워야 합니다")
+	}
+}
+
 func TestUnknownAndHelp(t *testing.T) {
 	setHome(t)
 	if code, out := call(t, "", "fly"); code != 1 || !strings.Contains(out, "모르는 명령") {

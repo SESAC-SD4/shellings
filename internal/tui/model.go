@@ -25,17 +25,18 @@ const (
 const readyStatus = "다른 터미널에서 연습 폴더로 가서 풀고, Enter로 채점하세요"
 
 type Model struct {
-	exs       []*exercise.Exercise
-	prog      *progress.Progress
-	render    Renderer
-	cursor    int
-	mode      Mode
-	hintLevel int
-	status    string
-	banner    string
-	width     int
-	height    int
-	vp        viewport.Model
+	exs        []*exercise.Exercise
+	prog       *progress.Progress
+	render     Renderer
+	cursor     int
+	mode       Mode
+	confirmAll bool
+	hintLevel  int
+	status     string
+	banner     string
+	width      int
+	height     int
+	vp         viewport.Model
 }
 
 func New(exs []*exercise.Exercise, prog *progress.Progress, render Renderer) Model {
@@ -75,11 +76,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // 한글 입력 상태(두벌식)로 누른 키를 원래 영문 키로 돌려 놓는다. ㄱ(r)은 넣지 않는다: 입력기가 붙잡았다가 Enter와 함께 보내면 되돌리기가 '예'로 실행된다.
 var hangulKeys = map[string]string{
-	"ㅂ": "q", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㅊ": "c",
+	"ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㅊ": "c",
 }
 
 // 한글 입력기는 자모를 조합 중으로 붙잡아 두므로, 입력기를 거치지 않는 키를 함께 둔다.
-var aliasKeys = map[string]string{"enter": "c", "tab": "h", "ctrl+r": "r", "esc": "q"}
+// 종료(Ctrl+C)·초기화(Ctrl+R·Ctrl+X)는 실수로 누르기 어려운 Ctrl 조합만 쓴다.
+var aliasKeys = map[string]string{"enter": "c", "tab": "h", "ctrl+r": "r"}
 
 func isASCII(s string) bool {
 	for _, r := range s {
@@ -95,20 +97,30 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	if k == "ctrl+c" {
 		return m, tea.Quit
 	}
-	// 확인 질문은 한글 입력 검사보다 먼저 본다. 한글 키(ㅜ 등)는 '아니오'로 취소되어야 한다.
+	// 확인 질문의 '예'는 영문 y 하나뿐이다. Enter나 다른 키는 취소, 한글은 질문을 연 채 안내만 한다.
 	if m.mode == ModeConfirm {
-		m.mode = ModePrompt
-		if k == "y" || k == "ㅛ" || k == "enter" {
-			m.prepare()
-		} else {
+		switch {
+		case k == "y":
+			m.mode = ModePrompt
+			if m.confirmAll {
+				m.resetAll()
+			} else {
+				m.prepare()
+			}
+		case !isASCII(k):
+			m.status = "한글로 들어오고 있습니다. 한/영 키로 영문으로 바꾼 뒤 y를 누르세요 (취소는 Esc)"
+		default:
+			m.mode = ModePrompt
 			m.status = "취소했습니다. 연습 폴더는 그대로입니다"
 		}
 		m.refresh()
 		return m, nil
 	}
-	if k == "esc" && m.mode == ModeHint {
-		m.mode, m.status = ModePrompt, readyStatus
-		m.refresh()
+	if k == "esc" {
+		if m.mode == ModeHint {
+			m.mode, m.status = ModePrompt, readyStatus
+			m.refresh()
+		}
 		return m, nil
 	}
 	if mapped, ok := hangulKeys[k]; ok {
@@ -124,14 +136,15 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.mode = ModePrompt
 	}
 	switch k {
-	case "q":
-		return m, tea.Quit
 	case "up", "k":
 		m.move(-1)
 	case "down", "j":
 		m.move(1)
 	case "r":
 		m.askOrPrepare()
+	case "ctrl+x":
+		m.mode, m.confirmAll = ModeConfirm, true
+		m.status = fmt.Sprintf("전체 초기화: %d문제의 연습 폴더와 ✅ 기록을 모두 처음으로 되돌릴까요? (y/n)", len(m.exs))
 	case "c":
 		m.check()
 	case "h":
@@ -156,8 +169,8 @@ func (m *Model) move(d int) {
 
 func (m *Model) askOrPrepare() {
 	if workspace.Exists(m.cur().Slug) {
-		m.mode = ModeConfirm
-		m.status = "처음 상태로 되돌릴까요? 지금까지 한 작업이 지워집니다 (y/n) · Enter도 예"
+		m.mode, m.confirmAll = ModeConfirm, false
+		m.status = "이 문제를 처음 상태로 되돌릴까요? 지금까지 한 작업과 ✅ 표시가 지워집니다 (y/n)"
 		return
 	}
 	m.prepare()
@@ -171,12 +184,29 @@ func (m *Model) prepare() {
 	}
 	m.prog.LastStarted = ex.ID
 	m.prog.ResetHint(ex.ID)
+	m.prog.Unpass(ex.ID)
 	m.hintLevel, m.banner = 0, ""
 	if err := m.prog.Save(); err != nil {
 		m.status = "❌ 진행 상황을 저장하지 못했습니다: " + err.Error()
 		return
 	}
 	m.status = "✅ 처음 상태로 만들었습니다. 다른 터미널에서: cd " + workspace.Display(ex.Slug)
+}
+
+func (m *Model) resetAll() {
+	for _, ex := range m.exs {
+		if err := workspace.Prepare(ex); err != nil {
+			m.status = "❌ " + ex.Title + " 연습 폴더를 되돌리지 못했습니다: " + err.Error()
+			return
+		}
+	}
+	m.prog.Passed, m.prog.HintLevel, m.prog.LastStarted = nil, nil, 0
+	m.cursor, m.hintLevel, m.banner = 0, 0, ""
+	if err := m.prog.Save(); err != nil {
+		m.status = "❌ 진행 상황을 저장하지 못했습니다: " + err.Error()
+		return
+	}
+	m.status = fmt.Sprintf("✅ %d문제를 모두 처음 상태로 되돌렸습니다", len(m.exs))
 }
 
 func (m *Model) check() {
@@ -210,7 +240,7 @@ func (m *Model) hint() {
 		m.hintLevel++
 	}
 	m.mode = ModeHint
-	m.status = fmt.Sprintf("힌트 %d/%d — Tab을 다시 누르면 다음 단계, 다른 키는 문제로 돌아갑니다", m.hintLevel, len(ex.Hints))
+	m.status = fmt.Sprintf("힌트 %d/%d — Tab을 다시 누르면 다음 단계, Esc로 닫기", m.hintLevel, len(ex.Hints))
 }
 
 func (m Model) Content() string {

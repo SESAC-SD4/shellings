@@ -196,6 +196,7 @@ func cmdReset(out io.Writer, prog *progress.Progress) int {
 		return 1
 	}
 	prog.ResetHint(ex.ID)
+	prog.Unpass(ex.ID)
 	if err := prog.Save(); err != nil {
 		fmt.Fprintf(out, "❌ 진행 상황을 저장하지 못했습니다: %v\n", err)
 		return 1

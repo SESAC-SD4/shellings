@@ -18,7 +18,7 @@ var (
 	keysTxt  = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-const keyHelp = "Enter 채점 · Tab 힌트 · ↑↓ 이동 · Ctrl+R 처음으로 · Esc 종료 · 스페이스/b 스크롤"
+const keyHelp = "Enter 채점 · Tab 힌트 · ↑↓ 이동 · Ctrl+R 이 문제 처음으로 · Ctrl+X 전체 초기화 · Ctrl+C 종료 · 스페이스/b 스크롤"
 
 func (m *Model) layout() {
 	w := m.width - listWidth - paneExtra*2

@@ -7,13 +7,14 @@ Windows Terminal + Git Bash 프로필 기준. 위에서부터 차례로 확인�
 - [ ] Windows Terminal의 새 탭 목록(`∨`)에 **Git Bash** 프로필이 있다. 없으면 어떻게 추가했는지 적는다
 - [ ] Git Bash 탭에서 `./shellings.exe`가 실행된다(실행 권한·Defender·SmartScreen 반응 기록)
 - [ ] 켜자마자 `~/shellings-work/` 안에 `01-make-til`부터 `22-diff`까지 22개 폴더가 생긴다
-- [ ] 화면이 그려지고 `↑` `↓` Enter Tab Ctrl+R Esc가 모두 먹는다
-- [ ] **한글 입력 상태**에서도 Enter(채점)·Tab(힌트)·Ctrl+R·Esc·화살표가 먹는다. 한글 상태에서 `c`를 누르면 무엇이 일어나는지 적는다
+- [ ] 화면이 그려지고 `↑` `↓` Enter Tab Esc(힌트 닫기) Ctrl+R Ctrl+X Ctrl+C가 모두 먹는다
+- [ ] **한글 입력 상태**에서도 Enter(채점)·Tab(힌트)·Ctrl+R·Ctrl+X·화살표가 먹는다. 한글 상태에서 `c`를 누르면 무엇이 일어나는지 적는다
 - [ ] 화면 안 한글 제목·설명이 깨지지 않고, 왼쪽 목록과 오른쪽 칸의 테두리가 어긋나지 않는다
 - [ ] 시작할 때 화면에 이상한 문자(`]11;rgb:...` 같은 것)가 찍히거나 몇 초 멈추지 않는다(배경색 감지)
 - [ ] 다른 탭에서 `cd ~/shellings-work/01-make-til`로 **같은 폴더**에 들어가진다(`ls`로 확인). 이 PC의 Git Bash에서 `echo $HOME`이 무엇인지 적는다
-- [ ] 1번을 풀고 Enter → ✅, Esc로 나갔다 다시 켜도 ✅와 풀던 내용이 남아 있다
-- [ ] 다른 탭이 `~/shellings-work/04-add-more` **안에 있는 채로** TUI에서 Ctrl+R → Enter: 오류 없이 되돌려지고, 그 탭에서 `ls`·`cat TIL/10-12.md`가 바로 된다
+- [ ] 1번을 풀고 Enter → ✅, Ctrl+C로 나갔다 다시 켜도 ✅와 풀던 내용이 남아 있다
+- [ ] 확인 질문에서 Enter는 취소되고, 영문 `y`로만 되돌려진다. Ctrl+X → `y`로 22문제와 ✅가 모두 처음으로 돌아간다
+- [ ] 다른 탭이 `~/shellings-work/04-add-more` **안에 있는 채로** TUI에서 Ctrl+R → `y`: 오류 없이 되돌려지고, 그 탭에서 `ls`·`cat TIL/10-12.md`가 바로 된다
 
 ## 문제별
 

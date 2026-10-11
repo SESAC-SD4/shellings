@@ -34,6 +34,8 @@ func key(k string) tea.KeyMsg {
 		return tea.KeyMsg{Type: tea.KeyCtrlC}
 	case "ctrl+r":
 		return tea.KeyMsg{Type: tea.KeyCtrlR}
+	case "ctrl+x":
+		return tea.KeyMsg{Type: tea.KeyCtrlX}
 	case "enter":
 		return tea.KeyMsg{Type: tea.KeyEnter}
 	case "tab":
@@ -111,8 +113,12 @@ func TestResetAsksBeforeOverwriting(t *testing.T) {
 		t.Fatal("n이면 학생 작업을 지키고 취소했다고 알려야 합니다")
 	}
 	m = press(m, "r", "enter")
+	if _, err := os.Stat(marker); err != nil {
+		t.Fatal("확인 질문에서 Enter는 '아니오'여야 합니다(실수로 지워지지 않게)")
+	}
+	m = press(m, "r", "y")
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
-		t.Fatal("확인 질문에서 Enter는 '예'여야 합니다")
+		t.Fatal("확인 질문에서 y는 '예'여야 합니다")
 	}
 	if m.Mode() != ModePrompt {
 		t.Fatal("확인이 끝나면 문제 화면으로 돌아가야 합니다")
@@ -180,13 +186,17 @@ func TestKoreanInputKeys(t *testing.T) {
 	if err := os.WriteFile(marker, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	m = press(m, "ctrl+r", "ㅜ")
+	m = press(m, "ctrl+r", "ㅜ", "esc")
 	if _, err := os.Stat(marker); err != nil || m.Mode() != ModePrompt {
-		t.Fatal("확인 질문에서 한글(ㅜ 등)은 취소여야 합니다")
+		t.Fatal("확인 질문에서 한글(ㅜ 등)로는 지워지지 않고, Esc로 취소되어야 합니다")
 	}
 	m = press(m, "ctrl+r", "ㅛ")
+	if _, err := os.Stat(marker); err != nil || m.Mode() != ModeConfirm || !strings.Contains(m.Status(), "영문") {
+		t.Fatal("확인 질문에서 한글이 들어오면 지우지 말고, 질문을 연 채 영문 y를 안내해야 합니다")
+	}
+	m = press(m, "y")
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
-		t.Fatal("확인 질문에서 ㅛ는 y로 동작해야 합니다")
+		t.Fatal("영문 y는 '예'여야 합니다")
 	}
 	m = press(m, "ㅗ")
 	if m.HintLevel() != 1 {
@@ -222,15 +232,66 @@ func TestEscClosesHintAndConfirmWithoutQuitting(t *testing.T) {
 	}
 }
 
-func TestQuit(t *testing.T) {
+func TestOnlyCtrlCQuits(t *testing.T) {
 	m := newModel(t, nil)
-	for _, k := range []string{"q", "esc", "ctrl+c"} {
-		_, cmd := m.Update(key(k))
-		if cmd == nil {
-			t.Fatalf("%s는 종료 명령을 돌려줘야 합니다", k)
+	for _, k := range []string{"q", "esc", "ㅂ"} {
+		if _, cmd := m.Update(key(k)); cmd != nil {
+			if _, ok := cmd().(tea.QuitMsg); ok {
+				t.Fatalf("%s로는 종료되지 않아야 합니다", k)
+			}
 		}
-		if _, ok := cmd().(tea.QuitMsg); !ok {
-			t.Fatalf("%s는 tea.Quit이어야 합니다", k)
+	}
+	_, cmd := m.Update(key("ctrl+c"))
+	if cmd == nil {
+		t.Fatal("Ctrl+C는 종료해야 합니다")
+	}
+	if _, ok := cmd().(tea.QuitMsg); !ok {
+		t.Fatal("Ctrl+C는 tea.Quit이어야 합니다")
+	}
+}
+
+func TestResetClearsPassMark(t *testing.T) {
+	prog := &progress.Progress{}
+	m := press(newModel(t, prog), "ctrl+r")
+	if err := os.Mkdir(filepath.Join(workspace.Dir("01-make-til"), "TIL"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	m = press(m, "enter", "k", "ctrl+r", "y")
+	if prog.IsPassed(1) {
+		t.Fatal("이 문제를 처음으로 되돌리면 ✅ 표시도 지워야 합니다")
+	}
+	saved, _ := progress.Load()
+	if saved.IsPassed(1) {
+		t.Fatal("지운 통과 기록이 파일에도 저장되어야 합니다")
+	}
+}
+
+func TestFullReset(t *testing.T) {
+	prog := &progress.Progress{Passed: []int{1, 5}}
+	m := newModel(t, prog)
+	m = press(m, "ctrl+r")
+	marker := filepath.Join(workspace.Dir(m.exs[m.Cursor()].Slug), "mine.txt")
+	if err := os.WriteFile(marker, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m = press(m, "ctrl+x")
+	if m.Mode() != ModeConfirm || !strings.Contains(m.Status(), "전체") {
+		t.Fatalf("전체 초기화는 먼저 물어야 합니다: %s", m.Status())
+	}
+	m = press(m, "enter")
+	if _, err := os.Stat(marker); err != nil || !prog.IsPassed(1) {
+		t.Fatal("Enter로는 전체 초기화되지 않아야 합니다")
+	}
+	m = press(m, "ctrl+x", "y")
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatal("전체 초기화는 모든 연습 폴더를 처음 상태로 되돌려야 합니다")
+	}
+	for _, ex := range exercises.All() {
+		if !workspace.Exists(ex.Slug) {
+			t.Fatalf("전체 초기화 뒤 %s 연습 폴더가 있어야 합니다", ex.Slug)
 		}
+	}
+	if len(prog.Passed) != 0 || m.Cursor() != 0 {
+		t.Fatalf("✅ 기록을 모두 지우고 1번으로 돌아가야 합니다: %v %d", prog.Passed, m.Cursor())
 	}
 }
