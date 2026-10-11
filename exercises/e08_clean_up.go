@@ -2,7 +2,9 @@ package exercises
 
 import "shellings-ko/internal/exercise"
 
-func init() { register(8, "08-clean-up", "08 임시 파일 지우기", false, setupCleanUp, checkCleanUp) }
+func init() {
+	register(8, "08-clean-up", "08 임시 파일 지우기", false, setupCleanUp, checkCleanUp)
+}
 
 func setupCleanUp(dir string) error {
 	return exercise.WriteFiles(dir, map[string]string{

@@ -7,7 +7,9 @@ import (
 	"shellings-ko/internal/exercise"
 )
 
-func init() { register(10, "10-ls-detail", "10 폴더 구별하기", false, setupLsDetail, checkLsDetail) }
+func init() {
+	register(10, "10-ls-detail", "10 폴더 구별하기", false, setupLsDetail, checkLsDetail)
+}
 
 const mysteryTarget = "mystery/notes2/found.txt"
 

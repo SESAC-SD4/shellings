@@ -2,7 +2,9 @@ package exercises
 
 import "shellings-ko/internal/exercise"
 
-func init() { register(12, "12-overwrite", "12 되돌릴 수 없는 사고", false, setupOverwrite, checkOverwrite) }
+func init() {
+	register(12, "12-overwrite", "12 되돌릴 수 없는 사고", false, setupOverwrite, checkOverwrite)
+}
 
 func setupOverwrite(dir string) error {
 	return exercise.WriteFiles(dir, map[string]string{

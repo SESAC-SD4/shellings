@@ -6,7 +6,9 @@ import (
 	"shellings-ko/internal/exercise"
 )
 
-func init() { register(7, "07-organize", "07 흩어진 파일 정리", false, setupOrganize, checkOrganize) }
+func init() {
+	register(7, "07-organize", "07 흩어진 파일 정리", false, setupOrganize, checkOrganize)
+}
 
 type move struct{ name, dest, other, body string }
 

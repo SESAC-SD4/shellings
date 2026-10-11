@@ -2,7 +2,9 @@ package exercises
 
 import "shellings-ko/internal/exercise"
 
-func init() { register(5, "05-read-and-copy", "05 목록대로 복사", false, setupReadAndCopy, checkReadAndCopy) }
+func init() {
+	register(5, "05-read-and-copy", "05 목록대로 복사", false, setupReadAndCopy, checkReadAndCopy)
+}
 
 const pickFile = "10-13.md"
 

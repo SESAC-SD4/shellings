@@ -2,7 +2,9 @@ package exercises
 
 import "shellings-ko/internal/exercise"
 
-func init() { register(4, "04-hidden-draft", "04 숨은 초안", false, setupHiddenDraft, checkHiddenDraft) }
+func init() {
+	register(4, "04-hidden-draft", "04 숨은 초안", false, setupHiddenDraft, checkHiddenDraft)
+}
 
 func setupHiddenDraft(dir string) error {
 	return exercise.WriteFiles(dir, map[string]string{
