@@ -19,7 +19,7 @@
 
 ```bash
 cd ~
-git clone <강사가 알려 준 주소> shellings
+git clone https://github.com/SESAC-SD4/shellings.git
 cd shellings
 ./shellings.exe     # Windows
 ./shellings         # mac
