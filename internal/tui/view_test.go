@@ -24,6 +24,17 @@ func TestViewShowsListContentAndKeys(t *testing.T) {
 	}
 }
 
+func TestListTitlesDoNotWrap(t *testing.T) {
+	m := newModel(t, nil)
+	tm, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
+	v := tm.View()
+	for _, ex := range m.exs {
+		if !strings.Contains(v, ex.Title) {
+			t.Errorf("목록에서 제목이 접혔습니다: %q", ex.Title)
+		}
+	}
+}
+
 func TestViewBeforeSize(t *testing.T) {
 	if v := newModel(t, nil).View(); !strings.Contains(v, "불러오는 중") {
 		t.Fatalf("창 크기를 받기 전에는 불러오는 중 표시: %q", v)
