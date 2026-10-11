@@ -21,7 +21,7 @@ func checkAddMore(dir string) exercise.Result {
 		}
 	}
 	if !hasHead {
-		return exercise.Fail("처음 줄 `## 터미널`이 사라졌습니다. `>` 하나는 덮어씁니다. 처음 상태로 되돌린 뒤(TUI는 `r`) `>>`로 다시 해 보세요")
+		return exercise.Fail("처음 줄 `## 터미널`이 사라졌습니다. `>` 하나는 덮어씁니다. 문제 화면에서 Ctrl+R로 처음 상태로 되돌린 뒤, 덧붙이는 방법으로 다시 해 보세요")
 	}
 	if len(lines) < 2 {
 		return exercise.Fail("아직 `## 터미널` 한 줄뿐입니다. 파일 끝에 내용을 덧붙여 보세요")

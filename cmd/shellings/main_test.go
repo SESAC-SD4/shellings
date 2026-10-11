@@ -27,7 +27,7 @@ func setHome(t *testing.T) {
 func TestList(t *testing.T) {
 	setHome(t)
 	code, out := call(t, "", "list")
-	if code != 0 || !strings.Contains(out, "⬜ 01 TIL 폴더") || !strings.Contains(out, "0/15 통과") {
+	if code != 0 || !strings.Contains(out, "⬜ 01 TIL 폴더") || !strings.Contains(out, "0/22 통과") {
 		t.Fatalf("목록이 나와야 합니다: %d\n%s", code, out)
 	}
 }

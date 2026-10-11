@@ -8,7 +8,7 @@ func setupMakeTil(dir string) error { return nil }
 
 func checkMakeTil(dir string) exercise.Result {
 	if exercise.IsFile(dir, "TIL") {
-		return exercise.Fail("`TIL`이 폴더가 아니라 파일입니다. `rm TIL`로 지우고 폴더로 다시 만드세요")
+		return exercise.Fail("`TIL`이 폴더가 아니라 파일입니다. 그 파일을 지우고 폴더로 다시 만드세요")
 	}
 	if !exercise.IsDir(dir, "TIL") {
 		return exercise.Missing(dir, "TIL")
