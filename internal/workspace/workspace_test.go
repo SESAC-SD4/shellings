@@ -71,6 +71,27 @@ func TestPrepareKeepsFolderForOpenShell(t *testing.T) {
 	}
 }
 
+func TestEnsureAllCreatesOnlyMissing(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	exs := []*exercise.Exercise{fake(1, "01-a"), fake(2, "02-b")}
+	if err := Prepare(exs[0]); err != nil {
+		t.Fatal(err)
+	}
+	mine := filepath.Join(Dir("01-a"), "mine.txt")
+	if err := os.WriteFile(mine, []byte("풀던 내용"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := EnsureAll(exs); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := os.Stat(mine); err != nil {
+		t.Fatal("이미 있는 연습 폴더는 건드리지 않아야 합니다")
+	}
+	if !exercise.IsFile(Dir("02-b"), "seed.txt") {
+		t.Fatal("없는 연습 폴더는 만들어야 합니다")
+	}
+}
+
 func TestPrepareRefusesEmptySlug(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	if err := Prepare(fake(1, "")); err == nil {

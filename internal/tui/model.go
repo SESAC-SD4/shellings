@@ -22,7 +22,7 @@ const (
 	ModeConfirm
 )
 
-const readyStatus = "s로 연습 폴더를 만들고, 다른 터미널에서 풀어 보세요"
+const readyStatus = "다른 터미널에서 연습 폴더로 가서 풀고, Enter로 채점하세요"
 
 type Model struct {
 	exs       []*exercise.Exercise
@@ -75,8 +75,11 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 // 한글 입력 상태(두벌식)로 누른 키를 원래 영문 키로 돌려 놓는다. 2·3번 문제에서 한글을 친 뒤 한/영을 안 바꾸는 경우가 많다.
 var hangulKeys = map[string]string{
-	"ㅂ": "q", "ㄱ": "r", "ㅛ": "y", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㄴ": "s", "ㅊ": "c",
+	"ㅂ": "q", "ㄱ": "r", "ㅛ": "y", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㅊ": "c",
 }
+
+// 한글 입력기는 자모를 조합 중으로 붙잡아 두므로, 입력기를 거치지 않는 키를 함께 둔다.
+var aliasKeys = map[string]string{"enter": "c", "tab": "h", "ctrl+r": "r", "esc": "q"}
 
 func isASCII(s string) bool {
 	for _, r := range s {
@@ -100,13 +103,16 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	}
 	if m.mode == ModeConfirm {
 		m.mode = ModePrompt
-		if k == "y" {
+		if k == "y" || k == "enter" {
 			m.prepare()
 		} else {
 			m.status = "취소했습니다. 연습 폴더는 그대로입니다"
 		}
 		m.refresh()
 		return m, nil
+	}
+	if alias, ok := aliasKeys[k]; ok {
+		k = alias
 	}
 	if m.mode == ModeHint && k != "h" {
 		m.mode = ModePrompt
@@ -118,7 +124,7 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 		m.move(-1)
 	case "down", "j":
 		m.move(1)
-	case "s", "r":
+	case "r":
 		m.askOrPrepare()
 	case "c":
 		m.check()
@@ -145,7 +151,7 @@ func (m *Model) move(d int) {
 func (m *Model) askOrPrepare() {
 	if workspace.Exists(m.cur().Slug) {
 		m.mode = ModeConfirm
-		m.status = "이미 연습 폴더가 있습니다. 처음 상태로 덮어쓸까요? (y/n)"
+		m.status = "처음 상태로 되돌릴까요? 지금까지 한 작업이 지워집니다 (y/n) · Enter도 예"
 		return
 	}
 	m.prepare()
@@ -164,19 +170,19 @@ func (m *Model) prepare() {
 		m.status = "❌ 진행 상황을 저장하지 못했습니다: " + err.Error()
 		return
 	}
-	m.status = "✅ 연습 폴더를 만들었습니다. 다른 터미널에서: cd " + workspace.Display(ex.Slug)
+	m.status = "✅ 처음 상태로 만들었습니다. 다른 터미널에서: cd " + workspace.Display(ex.Slug)
 }
 
 func (m *Model) check() {
 	ex := m.cur()
 	if !workspace.Exists(ex.Slug) {
-		m.status = "먼저 s를 눌러 연습 폴더를 만드세요"
+		m.status = "연습 폴더가 없습니다. Ctrl+R을 누르면 만듭니다"
 		return
 	}
 	r := ex.Check(workspace.Dir(ex.Slug))
 	if !r.Passed {
 		m.banner = "❌ 아직입니다 — " + r.Message
-		m.status = "아직입니다. h로 힌트를 볼 수 있습니다"
+		m.status = "아직입니다. Tab으로 힌트를 볼 수 있습니다"
 		return
 	}
 	m.prog.MarkPassed(ex.ID)
@@ -198,7 +204,7 @@ func (m *Model) hint() {
 		m.hintLevel++
 	}
 	m.mode = ModeHint
-	m.status = fmt.Sprintf("힌트 %d/%d — h를 다시 누르면 다음 단계, 다른 키는 문제로 돌아갑니다", m.hintLevel, len(ex.Hints))
+	m.status = fmt.Sprintf("힌트 %d/%d — Tab을 다시 누르면 다음 단계, 다른 키는 문제로 돌아갑니다", m.hintLevel, len(ex.Hints))
 }
 
 func (m Model) Content() string {
@@ -217,7 +223,7 @@ func (m Model) Content() string {
 	}
 	b.WriteString("---\n\n연습 폴더: `cd " + workspace.Display(ex.Slug) + "`\n")
 	if !workspace.Exists(ex.Slug) {
-		b.WriteString("\n아직 만들지 않았습니다. `s`를 누르세요.\n")
+		b.WriteString("\n연습 폴더가 없습니다. Ctrl+R을 누르면 만듭니다.\n")
 	}
 	return b.String()
 }

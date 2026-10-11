@@ -12,7 +12,7 @@ func TestViewShowsListContentAndKeys(t *testing.T) {
 	m := newModel(t, nil)
 	tm, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 40})
 	v := tm.View()
-	for _, want := range []string{"01 TIL 폴더", "22★ 바뀐 줄 찾기", "⬜", ">", "(c)채점", "(h)힌트", "TIL"} {
+	for _, want := range []string{"01 TIL 폴더", "22★ 바뀐 줄 찾기", "⬜", ">", "Enter 채점", "Tab 힌트", "TIL"} {
 		if !strings.Contains(v, want) {
 			t.Errorf("화면에 %q가 없습니다", want)
 		}

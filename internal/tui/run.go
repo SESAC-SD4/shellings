@@ -7,6 +7,7 @@ import (
 
 	"shellings-ko/internal/exercise"
 	"shellings-ko/internal/progress"
+	"shellings-ko/internal/workspace"
 )
 
 func GlamourRenderer(dark bool) Renderer {
@@ -32,6 +33,9 @@ func GlamourRenderer(dark bool) Renderer {
 
 // 배경 밝기는 프로그램을 띄우기 전에 한 번만 묻는다. 실행 중에 물으면 응답 문자가 키 입력으로 섞일 수 있다.
 func Run(exs []*exercise.Exercise, prog *progress.Progress) error {
+	if err := workspace.EnsureAll(exs); err != nil {
+		return err
+	}
 	render := GlamourRenderer(lipgloss.HasDarkBackground())
 	_, err := tea.NewProgram(New(exs, prog, render), tea.WithAltScreen()).Run()
 	return err

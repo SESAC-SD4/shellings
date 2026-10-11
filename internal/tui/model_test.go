@@ -32,6 +32,14 @@ func key(k string) tea.KeyMsg {
 		return tea.KeyMsg{Type: tea.KeyDown}
 	case "ctrl+c":
 		return tea.KeyMsg{Type: tea.KeyCtrlC}
+	case "ctrl+r":
+		return tea.KeyMsg{Type: tea.KeyCtrlR}
+	case "enter":
+		return tea.KeyMsg{Type: tea.KeyEnter}
+	case "tab":
+		return tea.KeyMsg{Type: tea.KeyTab}
+	case "esc":
+		return tea.KeyMsg{Type: tea.KeyEsc}
 	case "pgdown":
 		return tea.KeyMsg{Type: tea.KeyPgDown}
 	}
@@ -71,59 +79,62 @@ func TestMoveStaysInBounds(t *testing.T) {
 	}
 }
 
-func TestCheckBeforeStart(t *testing.T) {
+func TestCheckWithoutFolder(t *testing.T) {
 	m := press(newModel(t, nil), "c")
-	if !strings.Contains(m.Status(), "먼저 s") {
-		t.Fatalf("연습 폴더부터 만들라고 해야 합니다: %s", m.Status())
+	if !strings.Contains(m.Status(), "Ctrl+R") {
+		t.Fatalf("연습 폴더가 없으면 Ctrl+R로 만들라고 해야 합니다: %s", m.Status())
 	}
 }
 
-func TestStartCreatesWorkspace(t *testing.T) {
-	m := press(newModel(t, nil), "s")
-	if !workspace.Exists("01-make-til") {
-		t.Fatal("연습 폴더가 생겨야 합니다")
-	}
-	if !strings.Contains(m.Status(), "cd ~/shellings-work/01-make-til") {
-		t.Fatalf("어디로 가야 하는지 보여 줘야 합니다: %s", m.Status())
+func TestResetCreatesMissingFolderWithoutAsking(t *testing.T) {
+	m := press(newModel(t, nil), "ctrl+r")
+	if !workspace.Exists("01-make-til") || m.Mode() != ModePrompt {
+		t.Fatal("연습 폴더가 없으면 묻지 않고 바로 만들어야 합니다")
 	}
 	if !strings.Contains(m.Content(), "cd ~/shellings-work/01-make-til") {
-		t.Fatal("오른쪽 칸에도 연습 폴더 경로가 있어야 합니다")
+		t.Fatal("오른쪽 칸에 연습 폴더 경로가 있어야 합니다")
 	}
 }
 
-func TestStartTwiceAsksBeforeOverwriting(t *testing.T) {
-	m := press(newModel(t, nil), "s")
+func TestResetAsksBeforeOverwriting(t *testing.T) {
+	m := press(newModel(t, nil), "ctrl+r")
 	marker := filepath.Join(workspace.Dir("01-make-til"), "mine.txt")
 	if err := os.WriteFile(marker, []byte("내 작업"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	m = press(m, "s")
+	m = press(m, "ctrl+r")
 	if m.Mode() != ModeConfirm || !strings.Contains(m.Status(), "(y/n)") {
-		t.Fatalf("덮어쓸지 물어야 합니다: %v %s", m.Mode(), m.Status())
+		t.Fatalf("되돌릴지 물어야 합니다: %v %s", m.Mode(), m.Status())
 	}
 	m = press(m, "n")
 	if _, err := os.Stat(marker); err != nil || !strings.Contains(m.Status(), "취소") {
 		t.Fatal("n이면 학생 작업을 지키고 취소했다고 알려야 합니다")
 	}
-	m = press(m, "r", "y")
+	m = press(m, "r", "enter")
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
-		t.Fatal("r 다음 y면 처음 상태로 되돌려야 합니다")
+		t.Fatal("확인 질문에서 Enter는 '예'여야 합니다")
 	}
 	if m.Mode() != ModePrompt {
 		t.Fatal("확인이 끝나면 문제 화면으로 돌아가야 합니다")
 	}
 }
 
+func TestSKeyNoLongerExists(t *testing.T) {
+	press(newModel(t, nil), "s")
+	if workspace.Exists("01-make-til") {
+		t.Fatal("s 키는 없앴습니다(연습 폴더는 켤 때 자동으로 만든다)")
+	}
+}
+
 func TestCheckFailThenPass(t *testing.T) {
-	prog := &progress.Progress{}
-	m := press(newModel(t, prog), "s", "c")
+	m := press(newModel(t, nil), "ctrl+r", "enter")
 	if !strings.Contains(m.Banner(), "아직입니다") || m.Cursor() != 0 {
 		t.Fatalf("실패하면 그 자리에서 이유를 보여 줘야 합니다: %s", m.Banner())
 	}
 	if err := os.Mkdir(filepath.Join(workspace.Dir("01-make-til"), "TIL"), 0o755); err != nil {
 		t.Fatal(err)
 	}
-	m = press(m, "c")
+	m = press(m, "enter")
 	if !strings.Contains(m.Banner(), "통과") || m.Cursor() != 1 {
 		t.Fatalf("통과하면 배너를 남기고 다음 문제로 가야 합니다: %s %d", m.Banner(), m.Cursor())
 	}
@@ -141,11 +152,11 @@ func TestCheckFailThenPass(t *testing.T) {
 }
 
 func TestHintLevels(t *testing.T) {
-	m := press(newModel(t, nil), "h")
+	m := press(newModel(t, nil), "tab")
 	if m.Mode() != ModeHint || m.HintLevel() != 1 || !strings.Contains(m.Content(), "힌트 1/3") {
-		t.Fatalf("h 한 번이면 1단계: %v %d", m.Mode(), m.HintLevel())
+		t.Fatalf("Tab 한 번이면 1단계: %v %d", m.Mode(), m.HintLevel())
 	}
-	m = press(m, "h", "h", "h")
+	m = press(m, "h", "tab", "tab")
 	if m.HintLevel() != 3 || !strings.Contains(m.Content(), "힌트 3/3") || !strings.Contains(m.Content(), "힌트 1/3") {
 		t.Fatalf("3단계에서 멈추고 앞 단계도 함께 보여야 합니다: %d", m.HintLevel())
 	}
@@ -160,15 +171,15 @@ func TestHintLevels(t *testing.T) {
 }
 
 func TestKoreanInputKeys(t *testing.T) {
-	m := press(newModel(t, nil), "ㄴ")
+	m := press(newModel(t, nil), "ㄱ")
 	if !workspace.Exists("01-make-til") {
-		t.Fatal("한글 입력 상태의 ㄴ은 s로 동작해야 합니다")
+		t.Fatal("한글 입력 상태의 ㄱ은 r로 동작해야 합니다")
 	}
 	marker := filepath.Join(workspace.Dir("01-make-til"), "mine.txt")
 	if err := os.WriteFile(marker, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	m = press(m, "ㄴ", "ㅛ")
+	m = press(m, "ㄱ", "ㅛ")
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
 		t.Fatal("확인 질문에서 ㅛ는 y로 동작해야 합니다")
 	}
@@ -193,7 +204,7 @@ func TestScrollIsNotUndone(t *testing.T) {
 
 func TestQuit(t *testing.T) {
 	m := newModel(t, nil)
-	for _, k := range []string{"q", "ctrl+c"} {
+	for _, k := range []string{"q", "esc", "ctrl+c"} {
 		_, cmd := m.Update(key(k))
 		if cmd == nil {
 			t.Fatalf("%s는 종료 명령을 돌려줘야 합니다", k)

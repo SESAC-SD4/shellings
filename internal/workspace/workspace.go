@@ -47,6 +47,19 @@ func Prepare(ex *exercise.Exercise) error {
 	return ex.Setup(d)
 }
 
+// EnsureAll은 아직 없는 연습 폴더만 만든다. 이미 있는 폴더(학생이 풀던 것)는 건드리지 않는다.
+func EnsureAll(exs []*exercise.Exercise) error {
+	for _, ex := range exs {
+		if Exists(ex.Slug) {
+			continue
+		}
+		if err := Prepare(ex); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func real(p string) string {
 	if r, err := filepath.EvalSymlinks(p); err == nil {
 		return r
