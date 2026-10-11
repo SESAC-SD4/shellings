@@ -116,9 +116,18 @@ func TestDetect(t *testing.T) {
 	if got := Detect(home, exs, 0); got != nil {
 		t.Fatal("아무것도 시작하지 않았으면 nil")
 	}
+}
+
+func TestDetectThroughSymlink(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	exs := []*exercise.Exercise{fake(1, "01-a"), fake(2, "02-b")}
+	if err := os.MkdirAll(filepath.Join(Base(), "02-b"), 0o755); err != nil {
+		t.Fatal(err)
+	}
 	link := filepath.Join(t.TempDir(), "link")
 	if err := os.Symlink(filepath.Join(Base(), "02-b"), link); err != nil {
-		t.Fatal(err)
+		// Windows는 개발자 모드가 꺼져 있으면 일반 사용자가 링크를 만들 수 없다
+		t.Skipf("심볼릭 링크를 만들 수 없어 건너뜁니다: %v", err)
 	}
 	if got := Detect(link, exs, 1); got == nil || got.ID != 2 {
 		t.Fatalf("심볼릭 링크로 들어와도 같은 문제여야 합니다: %v", got)
