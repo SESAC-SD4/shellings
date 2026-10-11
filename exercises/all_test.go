@@ -28,8 +28,8 @@ func TestRegistry(t *testing.T) {
 		if strings.TrimSpace(ex.Prompt) == "" || len(ex.Hints) != 3 {
 			t.Errorf("%s: 문제 설명과 힌트 3단계가 있어야 합니다", ex.Slug)
 		}
-		if ex.Optional != (ex.ID >= 13) || ex.Optional != strings.Contains(ex.Title, "★") {
-			t.Errorf("%s: 13~15번만 선택(★)입니다", ex.Slug)
+		if ex.Optional != (ex.ID >= 19) || ex.Optional != strings.Contains(ex.Title, "★") {
+			t.Errorf("%s: 19~22번만 선택(★)입니다", ex.Slug)
 		}
 	}
 	if ByID(0) != nil || ByID(len(all)+1) != nil {
@@ -37,9 +37,9 @@ func TestRegistry(t *testing.T) {
 	}
 }
 
-func TestRegistryHasFifteen(t *testing.T) {
-	if n := len(All()); n != 15 {
-		t.Fatalf("문제는 15개여야 합니다(지금 %d)", n)
+func TestRegistryHasTwentyTwo(t *testing.T) {
+	if n := len(All()); n != 22 {
+		t.Fatalf("문제는 22개여야 합니다(지금 %d)", n)
 	}
 }
 
