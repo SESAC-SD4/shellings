@@ -1,6 +1,7 @@
 package exercises
 
 import (
+	"path/filepath"
 	"strings"
 
 	"shellings-ko/internal/exercise"
@@ -30,7 +31,8 @@ func checkAbsolutePath(dir string) exercise.Result {
 	if where == "" {
 		return exercise.Fail("`where.txt`는 생겼지만 비어 있습니다")
 	}
-	if !strings.HasSuffix(where, "/TIL/2026-10/week1") {
+	// 연습 폴더 이름까지 본다. 17번에도 같은 TIL/2026-10/week1이 있다.
+	if !strings.HasSuffix(where, "/"+filepath.Base(dir)+"/TIL/2026-10/week1") {
 		return exercise.Fail("`where.txt`에 적힌 위치가 `week1`이 아닙니다: `" + where + "`. `week1` 안으로 들어간 뒤 그 자리에서 저장하세요")
 	}
 	return exercise.Pass("깊은 폴더 안에서도 `~`로 시작하는 경로로 원하는 곳에 저장했습니다")

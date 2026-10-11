@@ -172,14 +172,19 @@ func TestHintLevels(t *testing.T) {
 
 func TestKoreanInputKeys(t *testing.T) {
 	m := press(newModel(t, nil), "ㄱ")
-	if !workspace.Exists("01-make-til") {
-		t.Fatal("한글 입력 상태의 ㄱ은 r로 동작해야 합니다")
+	if workspace.Exists("01-make-til") || !strings.Contains(m.Status(), "한/영") {
+		t.Fatal("ㄱ(r 자리)은 되돌리기로 쓰지 않아야 합니다. 입력기가 붙잡았다가 Enter와 함께 보내면 작업이 지워집니다")
 	}
+	m = press(m, "ctrl+r")
 	marker := filepath.Join(workspace.Dir("01-make-til"), "mine.txt")
 	if err := os.WriteFile(marker, []byte("x"), 0o644); err != nil {
 		t.Fatal(err)
 	}
-	m = press(m, "ㄱ", "ㅛ")
+	m = press(m, "ctrl+r", "ㅜ")
+	if _, err := os.Stat(marker); err != nil || m.Mode() != ModePrompt {
+		t.Fatal("확인 질문에서 한글(ㅜ 등)은 취소여야 합니다")
+	}
+	m = press(m, "ctrl+r", "ㅛ")
 	if _, err := os.Stat(marker); !os.IsNotExist(err) {
 		t.Fatal("확인 질문에서 ㅛ는 y로 동작해야 합니다")
 	}
@@ -199,6 +204,21 @@ func TestScrollIsNotUndone(t *testing.T) {
 	m = press(tm.(Model), "pgdown")
 	if m.vp.YOffset == 0 {
 		t.Fatal("PgDn으로 내린 스크롤이 바로 맨 위로 되돌아가면 안 됩니다")
+	}
+}
+
+func TestEscClosesHintAndConfirmWithoutQuitting(t *testing.T) {
+	m := newModel(t, nil)
+	tm, cmd := press(m, "tab").Update(key("esc"))
+	m = tm.(Model)
+	if cmd != nil || m.Mode() != ModePrompt {
+		t.Fatal("힌트 화면에서 Esc는 문제 설명으로 돌아가야 하고, 프로그램을 끄면 안 됩니다")
+	}
+	m = press(m, "ctrl+r", "ctrl+r")
+	tm, cmd = m.Update(key("esc"))
+	m = tm.(Model)
+	if cmd != nil || m.Mode() != ModePrompt || !strings.Contains(m.Status(), "취소") {
+		t.Fatal("확인 질문에서 Esc는 취소여야 합니다")
 	}
 }
 

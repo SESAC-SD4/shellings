@@ -73,9 +73,9 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// 한글 입력 상태(두벌식)로 누른 키를 원래 영문 키로 돌려 놓는다. 2·3번 문제에서 한글을 친 뒤 한/영을 안 바꾸는 경우가 많다.
+// 한글 입력 상태(두벌식)로 누른 키를 원래 영문 키로 돌려 놓는다. ㄱ(r)은 넣지 않는다: 입력기가 붙잡았다가 Enter와 함께 보내면 되돌리기가 '예'로 실행된다.
 var hangulKeys = map[string]string{
-	"ㅂ": "q", "ㄱ": "r", "ㅛ": "y", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㅊ": "c",
+	"ㅂ": "q", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㅊ": "c",
 }
 
 // 한글 입력기는 자모를 조합 중으로 붙잡아 두므로, 입력기를 거치지 않는 키를 함께 둔다.
@@ -92,23 +92,29 @@ func isASCII(s string) bool {
 
 func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	k := msg.String()
-	if mapped, ok := hangulKeys[k]; ok {
-		k = mapped
-	} else if !isASCII(k) {
-		m.status = "키가 한글로 들어오고 있습니다. 한/영 키를 눌러 영문으로 바꾸세요"
-		return m, nil
-	}
 	if k == "ctrl+c" {
 		return m, tea.Quit
 	}
+	// 확인 질문은 한글 입력 검사보다 먼저 본다. 한글 키(ㅜ 등)는 '아니오'로 취소되어야 한다.
 	if m.mode == ModeConfirm {
 		m.mode = ModePrompt
-		if k == "y" || k == "enter" {
+		if k == "y" || k == "ㅛ" || k == "enter" {
 			m.prepare()
 		} else {
 			m.status = "취소했습니다. 연습 폴더는 그대로입니다"
 		}
 		m.refresh()
+		return m, nil
+	}
+	if k == "esc" && m.mode == ModeHint {
+		m.mode, m.status = ModePrompt, readyStatus
+		m.refresh()
+		return m, nil
+	}
+	if mapped, ok := hangulKeys[k]; ok {
+		k = mapped
+	} else if !isASCII(k) {
+		m.status = "키가 한글로 들어오고 있습니다. 한/영 키를 눌러 영문으로 바꾸세요"
 		return m, nil
 	}
 	if alias, ok := aliasKeys[k]; ok {
