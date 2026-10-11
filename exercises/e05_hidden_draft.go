@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(5, "05-hidden-draft", "05 숨은 초안", false, setupHiddenDraft, checkHiddenDraft)

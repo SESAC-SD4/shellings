@@ -9,12 +9,12 @@ import (
 	"strconv"
 	"strings"
 
-	"shellings-ko/exercises"
-	"shellings-ko/internal/console"
-	"shellings-ko/internal/exercise"
-	"shellings-ko/internal/progress"
-	"shellings-ko/internal/tui"
-	"shellings-ko/internal/workspace"
+	"shellings/exercises"
+	"shellings/internal/console"
+	"shellings/internal/exercise"
+	"shellings/internal/progress"
+	"shellings/internal/tui"
+	"shellings/internal/workspace"
 )
 
 func main() {

@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(18, "18-overwrite", "18 되돌릴 수 없는 사고", false, setupOverwrite, checkOverwrite)

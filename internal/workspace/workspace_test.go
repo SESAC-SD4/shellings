@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func fake(id int, slug string) *exercise.Exercise {

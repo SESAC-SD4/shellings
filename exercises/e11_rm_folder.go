@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() { register(11, "11-rm-folder", "11 폴더 지우기", false, setupRmFolder, checkRmFolder) }
 

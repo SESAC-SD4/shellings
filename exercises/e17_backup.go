@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(17, "17-backup", "17 폴더째 백업", false, setupBackup, checkBackup)

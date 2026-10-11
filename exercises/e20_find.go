@@ -4,7 +4,7 @@ import (
 	"path"
 	"strings"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func init() { register(20, "20-find", "20★ 파일 찾기", true, setupFind, checkFind) }

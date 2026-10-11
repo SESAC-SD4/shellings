@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(14, "14-ls-to-file", "14 목록을 파일로", false, setupLsToFile, checkLsToFile)

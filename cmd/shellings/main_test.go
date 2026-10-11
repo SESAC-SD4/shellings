@@ -7,8 +7,8 @@ import (
 	"strings"
 	"testing"
 
-	"shellings-ko/internal/progress"
-	"shellings-ko/internal/workspace"
+	"shellings/internal/progress"
+	"shellings/internal/workspace"
 )
 
 func call(t *testing.T, input string, args ...string) (int, string) {

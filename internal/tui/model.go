@@ -7,9 +7,9 @@ import (
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
 
-	"shellings-ko/internal/exercise"
-	"shellings-ko/internal/progress"
-	"shellings-ko/internal/workspace"
+	"shellings/internal/exercise"
+	"shellings/internal/progress"
+	"shellings/internal/workspace"
 )
 
 type Renderer func(markdown string, width int) string

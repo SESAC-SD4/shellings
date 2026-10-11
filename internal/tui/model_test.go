@@ -8,9 +8,9 @@ import (
 
 	tea "github.com/charmbracelet/bubbletea"
 
-	"shellings-ko/exercises"
-	"shellings-ko/internal/progress"
-	"shellings-ko/internal/workspace"
+	"shellings/exercises"
+	"shellings/internal/progress"
+	"shellings/internal/workspace"
 )
 
 func plain(md string, width int) string { return md }

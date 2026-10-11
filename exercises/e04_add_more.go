@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() { register(4, "04-add-more", "04 내용 덧붙이기", false, setupAddMore, checkAddMore) }
 

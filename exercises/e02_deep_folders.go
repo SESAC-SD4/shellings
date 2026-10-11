@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(2, "02-deep-folders", "02 깊은 폴더", false, setupDeepFolders, checkDeepFolders)

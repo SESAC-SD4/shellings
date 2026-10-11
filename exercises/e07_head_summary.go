@@ -3,7 +3,7 @@ package exercises
 import (
 	"strings"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func init() {

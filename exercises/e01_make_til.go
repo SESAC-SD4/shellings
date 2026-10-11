@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() { register(1, "01-make-til", "01 TIL 폴더", false, setupMakeTil, checkMakeTil) }
 

@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(16, "16-grep-pipe", "16 10월만 골라내기", false, setupGrepPipe, checkGrepPipe)

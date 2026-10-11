@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() { register(3, "03-first-entry", "03 첫 기록", false, setupFirstEntry, checkFirstEntry) }
 

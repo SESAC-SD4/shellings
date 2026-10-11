@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func init() { register(21, "21-wc", "21★ 줄 수 세기", true, setupPipe, checkPipe) }

@@ -1,4 +1,4 @@
-module shellings-ko
+module shellings
 
 go 1.26.0
 

@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 // Git Bash에서 HOME을 따로 정한 학생도 `cd ~/shellings-work`와 같은 곳을 보도록 HOME을 먼저 쓴다.

@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func prepare(t *testing.T, ex *exercise.Exercise) string {

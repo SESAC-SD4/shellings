@@ -5,9 +5,9 @@ import (
 	"github.com/charmbracelet/glamour"
 	"github.com/charmbracelet/lipgloss"
 
-	"shellings-ko/internal/exercise"
-	"shellings-ko/internal/progress"
-	"shellings-ko/internal/workspace"
+	"shellings/internal/exercise"
+	"shellings/internal/progress"
+	"shellings/internal/workspace"
 )
 
 func GlamourRenderer(dark bool) Renderer {

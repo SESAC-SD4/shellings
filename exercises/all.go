@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sort"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 //go:embed */prompt.md */hint.md

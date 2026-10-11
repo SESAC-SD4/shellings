@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"shellings-ko/internal/workspace"
+	"shellings/internal/workspace"
 )
 
 type Progress struct {

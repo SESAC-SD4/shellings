@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(6, "06-read-and-copy", "06 목록대로 복사", false, setupReadAndCopy, checkReadAndCopy)

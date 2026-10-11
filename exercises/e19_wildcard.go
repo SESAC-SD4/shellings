@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func init() {

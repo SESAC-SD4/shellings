@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() { register(8, "08-rename", "08 이름 오타", false, setupRename, checkRename) }
 

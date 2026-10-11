@@ -1,6 +1,6 @@
 package exercises
 
-import "shellings-ko/internal/exercise"
+import "shellings/internal/exercise"
 
 func init() {
 	register(10, "10-clean-up", "10 임시 파일 지우기", false, setupCleanUp, checkCleanUp)

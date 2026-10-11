@@ -3,7 +3,7 @@ package exercises
 import (
 	"fmt"
 
-	"shellings-ko/internal/exercise"
+	"shellings/internal/exercise"
 )
 
 func init() { register(15, "15-grep", "15 단어로 찾기", false, setupGrep, checkGrep) }
