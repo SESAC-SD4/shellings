@@ -56,7 +56,6 @@ func (m Model) HintLevel() int          { return m.hintLevel }
 func (m Model) Status() string          { return m.status }
 func (m Model) Banner() string          { return m.banner }
 func (m Model) Init() tea.Cmd           { return nil }
-func (m Model) View() string            { return m.Content() }
 func (m Model) cur() *exercise.Exercise { return m.exs[m.cursor] }
 
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -202,9 +201,6 @@ func (m Model) Content() string {
 	}
 	return b.String()
 }
-
-// layout은 Task 9에서 창 크기에 맞춰 칸 너비를 정한다.
-func (m *Model) layout() {}
 
 func (m *Model) refresh() {
 	m.vp.SetContent(m.render(m.Content(), m.vp.Width))
