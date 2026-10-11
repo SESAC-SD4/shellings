@@ -32,6 +32,8 @@ func key(k string) tea.KeyMsg {
 		return tea.KeyMsg{Type: tea.KeyDown}
 	case "ctrl+c":
 		return tea.KeyMsg{Type: tea.KeyCtrlC}
+	case "pgdown":
+		return tea.KeyMsg{Type: tea.KeyPgDown}
 	}
 	return tea.KeyMsg{Type: tea.KeyRunes, Runes: []rune(k)}
 }
@@ -154,6 +156,38 @@ func TestHintLevels(t *testing.T) {
 	m = press(m, "j")
 	if m.HintLevel() != 0 {
 		t.Fatal("문제를 바꾸면 힌트 단계는 처음으로")
+	}
+}
+
+func TestKoreanInputKeys(t *testing.T) {
+	m := press(newModel(t, nil), "ㄴ")
+	if !workspace.Exists("01-make-til") {
+		t.Fatal("한글 입력 상태의 ㄴ은 s로 동작해야 합니다")
+	}
+	marker := filepath.Join(workspace.Dir("01-make-til"), "mine.txt")
+	if err := os.WriteFile(marker, []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	m = press(m, "ㄴ", "ㅛ")
+	if _, err := os.Stat(marker); !os.IsNotExist(err) {
+		t.Fatal("확인 질문에서 ㅛ는 y로 동작해야 합니다")
+	}
+	m = press(m, "ㅗ")
+	if m.HintLevel() != 1 {
+		t.Fatal("ㅗ는 h로 동작해야 합니다")
+	}
+	m = press(m, "가")
+	if !strings.Contains(m.Status(), "한/영") {
+		t.Fatalf("알 수 없는 한글 입력이면 한/영 키를 안내해야 합니다: %s", m.Status())
+	}
+}
+
+func TestScrollIsNotUndone(t *testing.T) {
+	m := newModel(t, nil)
+	tm, _ := m.Update(tea.WindowSizeMsg{Width: 120, Height: 12})
+	m = press(tm.(Model), "pgdown")
+	if m.vp.YOffset == 0 {
+		t.Fatal("PgDn으로 내린 스크롤이 바로 맨 위로 되돌아가면 안 됩니다")
 	}
 }
 

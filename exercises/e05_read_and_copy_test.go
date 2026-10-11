@@ -12,6 +12,11 @@ func TestReadAndCopy(t *testing.T) {
 		sh(t, dir, "cat index.txt && cp TIL/10-13.md portfolio/")
 		mustPass(t, ex, dir)
 	})
+	t.Run("Finder가 .DS_Store를 만들어도 통과", func(t *testing.T) {
+		dir := prepare(t, ex)
+		sh(t, dir, "cp TIL/10-13.md portfolio/ && touch portfolio/.DS_Store")
+		mustPass(t, ex, dir)
+	})
 	t.Run("다른 글을 복사하면 안내", func(t *testing.T) {
 		dir := prepare(t, ex)
 		sh(t, dir, "cp TIL/10-12.md portfolio/")

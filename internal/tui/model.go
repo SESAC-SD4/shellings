@@ -73,8 +73,28 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
+// 한글 입력 상태(두벌식)로 누른 키를 원래 영문 키로 돌려 놓는다. 2·3번 문제에서 한글을 친 뒤 한/영을 안 바꾸는 경우가 많다.
+var hangulKeys = map[string]string{
+	"ㅂ": "q", "ㄱ": "r", "ㅛ": "y", "ㅗ": "h", "ㅓ": "j", "ㅏ": "k", "ㄴ": "s", "ㅊ": "c",
+}
+
+func isASCII(s string) bool {
+	for _, r := range s {
+		if r > 127 {
+			return false
+		}
+	}
+	return true
+}
+
 func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	k := msg.String()
+	if mapped, ok := hangulKeys[k]; ok {
+		k = mapped
+	} else if !isASCII(k) {
+		m.status = "키가 한글로 들어오고 있습니다. 한/영 키를 눌러 영문으로 바꾸세요"
+		return m, nil
+	}
 	if k == "ctrl+c" {
 		return m, tea.Quit
 	}
@@ -105,9 +125,9 @@ func (m Model) handleKey(msg tea.KeyMsg) (tea.Model, tea.Cmd) {
 	case "h":
 		m.hint()
 	default:
+		// 내용이 바뀌지 않았으므로 refresh(맨 위로 이동)를 부르지 않는다. 부르면 스크롤이 바로 되돌아간다.
 		var cmd tea.Cmd
 		m.vp, cmd = m.vp.Update(msg)
-		m.refresh()
 		return m, cmd
 	}
 	m.refresh()

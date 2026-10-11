@@ -31,11 +31,18 @@ func Prepare(ex *exercise.Exercise) error {
 		return errors.New("문제 slug가 비어 있습니다")
 	}
 	d := Dir(ex.Slug)
-	if err := os.RemoveAll(d); err != nil {
-		return err
-	}
 	if err := os.MkdirAll(d, 0o755); err != nil {
 		return err
+	}
+	// 학생의 다른 터미널이 이 폴더 안에 있을 수 있으므로 폴더 자체는 남기고 안만 비운다.
+	entries, err := os.ReadDir(d)
+	if err != nil {
+		return err
+	}
+	for _, e := range entries {
+		if err := os.RemoveAll(filepath.Join(d, e.Name())); err != nil {
+			return err
+		}
 	}
 	return ex.Setup(d)
 }

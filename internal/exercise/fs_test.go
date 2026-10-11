@@ -75,6 +75,22 @@ func TestList(t *testing.T) {
 	}
 }
 
+func TestListSkipsHiddenFiles(t *testing.T) {
+	dir := t.TempDir()
+	if err := WriteFiles(dir, map[string]string{"p/a.md": "", "p/.DS_Store": ""}); err != nil {
+		t.Fatal(err)
+	}
+	if got := List(dir, "p"); len(got) != 1 || got[0] != "a.md" {
+		t.Fatalf("Finder가 만드는 .DS_Store 같은 숨김 파일은 빼야 합니다: %q", got)
+	}
+}
+
+func TestMissingSuggestsPwd(t *testing.T) {
+	if r := Missing(t.TempDir(), "TIL"); !strings.Contains(r.Message, "pwd") {
+		t.Fatalf("엉뚱한 폴더에서 작업했을 수 있으니 pwd 확인을 안내해야 합니다: %s", r.Message)
+	}
+}
+
 func TestMissingPointsOutCase(t *testing.T) {
 	dir := t.TempDir()
 	if err := WriteFiles(dir, map[string]string{"til/": ""}); err != nil {

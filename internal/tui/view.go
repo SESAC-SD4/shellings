@@ -18,7 +18,7 @@ var (
 	keysTxt  = lipgloss.NewStyle().Foreground(lipgloss.Color("244"))
 )
 
-const keyHelp = "(s)시작 (c)채점 (h)힌트 (r)리셋 (q)종료 · PgUp/PgDn 스크롤"
+const keyHelp = "(s)시작 (c)채점 (h)힌트 (r)리셋 (q)종료 · 스크롤: 스페이스/b (PgDn/PgUp)"
 
 func (m *Model) layout() {
 	w := m.width - listWidth - paneExtra*2

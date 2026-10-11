@@ -49,6 +49,28 @@ func TestPrepareRecreates(t *testing.T) {
 	}
 }
 
+func TestPrepareKeepsFolderForOpenShell(t *testing.T) {
+	t.Setenv("HOME", t.TempDir())
+	ex := fake(1, "01-a")
+	if err := Prepare(ex); err != nil {
+		t.Fatal(err)
+	}
+	before, _ := os.Stat(Dir("01-a"))
+	if err := os.WriteFile(filepath.Join(Dir("01-a"), ".hidden"), []byte("x"), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	if err := Prepare(ex); err != nil {
+		t.Fatal(err)
+	}
+	after, _ := os.Stat(Dir("01-a"))
+	if !os.SameFile(before, after) {
+		t.Fatal("다른 터미널이 들어가 있는 폴더 자체를 지우면 안 됩니다. 안의 내용만 비워야 합니다")
+	}
+	if _, err := os.Stat(filepath.Join(Dir("01-a"), ".hidden")); !os.IsNotExist(err) {
+		t.Fatal("숨김 파일까지 비워야 합니다")
+	}
+}
+
 func TestPrepareRefusesEmptySlug(t *testing.T) {
 	t.Setenv("HOME", t.TempDir())
 	if err := Prepare(fake(1, "")); err == nil {

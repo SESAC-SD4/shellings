@@ -113,7 +113,10 @@ func List(dir, rel string) []string {
 	}
 	names := make([]string, 0, len(entries))
 	for _, e := range entries {
-		names = append(names, e.Name())
+		// Finder가 만드는 .DS_Store 같은 숨김 파일 때문에 정답이 실패하지 않도록 뺀다.
+		if !strings.HasPrefix(e.Name(), ".") {
+			names = append(names, e.Name())
+		}
 	}
 	sort.Strings(names)
 	return names
@@ -144,5 +147,5 @@ func Missing(dir, rel string) Result {
 		}
 		break
 	}
-	return Fail(fmt.Sprintf("아직 없습니다: `%s`", rel))
+	return Fail(fmt.Sprintf("아직 없습니다: `%s`. 다른 터미널에서 `pwd`로 연습 폴더 안에 있는지 확인하세요", rel))
 }
